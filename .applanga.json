@@ -20,13 +20,6 @@
           "exclude_languages": [
             "en"
           ]
-        },
-        {
-          "path": "./translations/<language>.json",
-          "file_format": "chrome_i18n_json",
-          "tag": "app:messages.json",
-          "language": "pl"
-        }
       ]
     }
   }
