@@ -4,9 +4,9 @@
     "push": {
       "source": [
         {
-          "path": "./package.json",
-          "file_format": "chrome_i18n_json",
-          "tag": ["app:messages.json", "another-tag"],
+          "path": "./package-lock.json",
+          "file_format": "angular_translate_json",
+          "tag": "app:language.json",
           "language": "en"
         }
       ]
@@ -15,8 +15,8 @@
       "target": [
         {
           "path": "./<language>.json",
-          "file_format": "chrome_i18n_json",
-          "tag": "app:messages.json",
+          "file_format": "angular_translate_json",
+          "tag": "app:language.json",
           "exclude_languages": [
             "en"
           ]
@@ -25,4 +25,3 @@
     }
   }
 }
-
