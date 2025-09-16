@@ -20,7 +20,9 @@
           "exclude_languages": [
             "en"
           ]
+        }
       ]
     }
   }
 }
+
