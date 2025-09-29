@@ -33,7 +33,7 @@ on:
         type: string
       webhookEndpointId:
         description: 'Webhook Endpoint ID - Fill manually'
-        required: true
+        required: false
         type: string
 
 jobs:
