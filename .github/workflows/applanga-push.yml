@@ -16,6 +16,17 @@ jobs:
   push-sources-for-translation:
     runs-on: ubuntu-latest
     steps:
+      # Step 1: Notify workflow started
+      - name: Notify workflow started
+        run: |
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/start" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+            -d '{
+              "workflowType": "push",
+              "runId": "${{ github.run_id }}"
+            }' || echo "Failed to notify workflow start, continuing anyway"
+
       - uses: actions/checkout@v3
         with:
           path: checkout
@@ -35,3 +46,28 @@ jobs:
           APPLANGA_ACCESS_TOKEN: '${{ secrets.APPLANGA_ACCESS_TOKEN }}'
         run: applanga pushtarget --force
         working-directory: checkout
+      # Step 6: Notify workflow success
+      - name: Notify workflow success
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/complete" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+            -d '{
+              "workflowType": "push",
+              "status": "success",
+              "runId": "${{ github.run_id }}"
+            }' || echo "Failed to notify workflow success"
+
+      # Step 7: Notify workflow failure
+      - name: Notify workflow failure
+        if: failure()
+        run: |
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/complete" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+            -d '{
+              "workflowType": "push",
+              "status": "failed",
+              "runId": "${{ github.run_id }}"
+            }' || echo "Failed to notify workflow failure"
