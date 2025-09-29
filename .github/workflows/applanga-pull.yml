@@ -25,7 +25,7 @@ on:
         default: newTranslations
       mobileAppId:
         description: 'Mobile App ID (MongoDB _id) - Fill manually'
-        required: true
+        required: false
         type: string
       branchId:
         description: 'Branch ID (optional) - Fill manually if using branches'
@@ -43,7 +43,7 @@ jobs:
       # Step 1: Notify workflow started
       - name: Notify workflow started
         run: |
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/start" \
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/start" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
             -d '{
@@ -88,7 +88,7 @@ jobs:
       - name: Notify workflow success
         if: success()
         run: |
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/complete" \
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/complete" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
             -d '{
@@ -102,7 +102,7 @@ jobs:
       - name: Notify workflow failure
         if: failure()
         run: |
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/complete" \
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/complete" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
             -d '{
