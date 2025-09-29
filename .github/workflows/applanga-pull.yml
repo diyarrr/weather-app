@@ -52,6 +52,8 @@ jobs:
               "runId": "${{ github.run_id }}",
               "webhookEndpointId": "${{ github.event.inputs.webhookEndpointId }}"
             }' || echo "Failed to notify workflow start, continuing anyway"
+      - name: Wait for 30 seconds
+        run: sleep 30
 
       # Step 2: Checkout repository
       - uses: actions/checkout@v3
