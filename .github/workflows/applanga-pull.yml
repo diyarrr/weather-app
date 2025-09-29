@@ -1,5 +1,4 @@
 name: Pull Target Files from Applanga
-
 on:
   workflow_dispatch:
     inputs:
@@ -23,58 +22,23 @@ on:
         description: Source branch for the pull request
         required: false
         default: newTranslations
-      mobileAppId:
-        description: 'Mobile App ID (MongoDB _id) - Fill manually'
-        required: true
-        type: string
-      branchId:
-        description: 'Branch ID (optional) - Fill manually if using branches'
-        required: false
-        type: string
-      webhookEndpointId:
-        description: 'Webhook Endpoint ID - Fill manually'
-        required: false
-        type: string
-
 jobs:
   pull-translation-in:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Notify workflow started
-      - name: Notify workflow started
-        run: |
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/start" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
-            -d '{
-              "branchId": "${{ github.event.inputs.branchId }}",
-              "workflowType": "pull",
-              "runId": "${{ github.run_id }}",
-              "webhookEndpointId": "${{ github.event.inputs.webhookEndpointId }}"
-            }' || echo "Failed to notify workflow start, continuing anyway"
-      - name: Wait for 30 seconds
-        run: sleep 30
-
-      # Step 2: Checkout repository
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
           path: checkout
-      
-      # Step 3: Setup Applanga CLI
       - uses: applanga/setup-applanga-cli@v1.0.3
         with:
           version: 1.0.*
-      
-      # Step 4: Pull translations from Applanga
       - name: Pull translations from Applanga
         env:
           APPLANGA_ACCESS_TOKEN: ${{ secrets.APPLANGA_ACCESS_TOKEN }}
           APPLANGA_API_HOST: ${{ secrets.APPLANGA_API_HOST }}
         run: 'applanga pull ${{ github.event.inputs.tags }}'
         working-directory: checkout
-      
-      # Step 5: Create Pull Request
       - name: Create Pull Request
         uses: applanga/pe-create-pull-request@main
         with:
@@ -85,31 +49,3 @@ jobs:
           title: ${{ github.event.inputs.pr_title }}
           body: Pulled in new translations from Applanga portal
           path: checkout
-
-      # Step 6: Notify workflow success
-      - name: Notify workflow success
-        if: success()
-        run: |
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/complete" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
-            -d '{
-              "branchId": "${{ github.event.inputs.branchId }}",
-              "workflowType": "pull",
-              "status": "success",
-              "runId": "${{ github.run_id }}"
-            }' || echo "Failed to notify workflow success"
-
-      # Step 7: Notify workflow failure
-      - name: Notify workflow failure
-        if: failure()
-        run: |
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/complete" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
-            -d '{
-              "branchId": "${{ github.event.inputs.branchId }}",
-              "workflowType": "pull",
-              "status": "failed",
-              "runId": "${{ github.run_id }}"
-            }' || echo "Failed to notify workflow failure"
