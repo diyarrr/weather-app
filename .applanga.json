@@ -4,9 +4,9 @@
     "push": {
       "source": [
         {
-          "path": "./package.json",
+          "path": "./package-lock.json",
           "file_format": "chrome_i18n_json",
-          "tag": "app:messages.json",
+          "tag": "app:messages:2823.json",
           "language": "en"
         }
       ]
@@ -16,7 +16,7 @@
         {
           "path": "./<language>.json",
           "file_format": "chrome_i18n_json",
-          "tag": "app:messages.json",
+          "tag": "app:messages:2823.json",
           "exclude_languages": [
             "en"
           ]
