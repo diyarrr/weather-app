@@ -12,13 +12,21 @@ on:
         description: Push translation files. If set translation files will be pushed instead of source files
         default: false
         required: false
+      mobileAppId:
+        description: Mobile App ID (MongoDB _id)
+        required: true
+        type: string
+      branchId:
+        description: Branch ID (optional)
+        required: false
+        type: string
 jobs:
   push-sources-for-translation:
     runs-on: ubuntu-latest
     steps:
       - name: Notify workflow started
         run: |-
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/start" \
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/start" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
             -d '{
@@ -47,7 +55,7 @@ jobs:
       - name: Notify workflow success
         if: success()
         run: |-
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/complete" \
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/complete" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
             -d '{
@@ -58,7 +66,7 @@ jobs:
       - name: Notify workflow failure
         if: failure()
         run: |-
-          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/6878ae0f07f5be3de27fad2d/github/workflow/complete" \
+          curl -X POST "${{ secrets.APPLANGA_BASE_BASE_URL }}/v2/projects/${{ github.event.inputs.mobileAppId }}/github/workflow/complete" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
             -d '{
