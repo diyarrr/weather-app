@@ -2,10 +2,24 @@
   "app": {
     "base_language": "en",
     "push": {
-      "source": []
+      "source": [
+        {
+          "path": "./package-lock.json",
+          "file_format": "chrome_i18n_json",
+          "tag": ["app:messages:2823.json"],
+          "language": "en"
+        }
+      ]
     },
     "pull": {
-      "target": []
+      "target": [
+        {
+          "path": "./<language>.json",
+          "file_format": "chrome_i18n_json",
+          "tag": "app:messages:2823.json",
+          "exclude_languages": ["en"]
+        }
+      ]
     }
   }
 }
