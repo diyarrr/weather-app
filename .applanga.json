@@ -20,6 +20,14 @@
           "exclude_languages": [
             "en"
           ]
+        },
+        {
+          "file_format": "nested_json",
+          "path": "./<language>.json",
+          "tag": "app:messages:2823.json",
+          "exclude_languages": [
+            "en"
+          ]
         }
       ]
     }
