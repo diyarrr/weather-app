@@ -46,25 +46,27 @@ jobs:
           APPLANGA_API_HOST: ${{ secrets.APPLANGA_API_HOST }}
         run: applanga push --force
         working-directory: checkout
+      - name: wait 30 seconds
+        run: sleep 30
       - name: Push Translation Files to Applanga
         if: '${{ inputs.push_targets == true }}'
         env:
           APPLANGA_ACCESS_TOKEN: '${{ secrets.APPLANGA_ACCESS_TOKEN }}'
         run: applanga pushtarget --force
         working-directory: checkout
-      - name: Notify workflow success
-        if: success()
-        run: |-
-          curl -X POST "${{ secrets.APPLANGA_API_HOST }}/v2/projects/${{ github.event.inputs.mobileAppId }}/workflow-complete" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
-            -d '{
-            "branchId": "${{ github.event.inputs.branchId }}",
-            "workflowType": "push",
-              "status": "success"
-            }' || echo "Failed to notify workflow success"
+      # - name: Notify workflow success
+      #   if: success()
+      #   run: |-
+      #     curl -X POST "${{ secrets.APPLANGA_API_HOST }}/v2/projects/${{ github.event.inputs.mobileAppId }}/workflow-complete" \
+      #       -H "Content-Type: application/json" \
+      #       -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+      #       -d '{
+      #       "branchId": "${{ github.event.inputs.branchId }}",
+      #       "workflowType": "push",
+      #         "status": "success"
+      #       }' || echo "Failed to notify workflow success"
       - name: Notify workflow failure
-        if: failure()
+        # if: failure()
         run: |-
           curl -X POST "${{ secrets.APPLANGA_API_HOST }}/v2/projects/${{ github.event.inputs.mobileAppId }}/workflow-complete" \
             -H "Content-Type: application/json" \
