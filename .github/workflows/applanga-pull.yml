@@ -1,0 +1,89 @@
+name: Pull Target Files from Applanga
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Pre-formatted --tag options for pulled entries (e.g. --tag login --tag error)
+        required: false
+        default: ''
+      pr_title:
+        description: Title for the pull request
+        required: false
+        default: Updated translations
+      commit_message:
+        description: Commit message for the PR
+        required: false
+        default: Updated translations
+      target_branch:
+        description: Target branch for the pull request
+        required: false
+        default: ''
+      source_branch:
+        description: Source branch for the pull request
+        required: false
+        default: newTranslations
+      branch_id:
+        description: Branch ID
+        required: false
+        type: string
+jobs:
+  pull-translation-in:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Mobile App ID from Access Token
+        id: extract-app-id
+        run: 'echo "MOBILE_APP_ID=$(echo "${{ secrets.APPLANGA_ACCESS_TOKEN }}" | cut -d''!'' -f1)" >> $GITHUB_OUTPUT'
+      - name: Notify workflow started
+        run: |-
+          curl -X POST "${{ secrets.APPLANGA_API_HOST }}/v1/api/workflow-start?app=${{ steps.extract-app-id.outputs.MOBILE_APP_ID }}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+            -d '{
+              "branchId": "${{ github.event.inputs.branch_id }}",
+              "workflowType": "pull"
+           }' || echo "Failed to notify workflow start, continuing anyway"
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.target_branch || github.ref_name }}
+          path: checkout
+      - uses: applanga/setup-applanga-cli@v1.0.3
+        with:
+          version: 1.0.*
+      - name: Pull translations from Applanga
+        env:
+          APPLANGA_ACCESS_TOKEN: ${{ secrets.APPLANGA_ACCESS_TOKEN }}
+          APPLANGA_API_HOST: ${{ secrets.APPLANGA_API_HOST }}
+        run: 'applanga pull ${{ github.event.inputs.tags }}'
+        working-directory: checkout
+      - name: Create Pull Request
+        uses: applanga/pe-create-pull-request@main
+        with:
+          branch: ${{ github.event.inputs.source_branch }}
+          base: ${{ github.event.inputs.target_branch || github.event.repository.default_branch }}
+          author: 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'
+          commit-message: ${{ github.event.inputs.commit_message }}
+          title: ${{ github.event.inputs.pr_title }}
+          body: Pulled in new translations from Applanga portal
+          path: checkout
+      - name: Notify workflow success
+        if: success()
+        run: |-
+          curl -X POST "${{ secrets.APPLANGA_API_HOST }}/v1/api/workflow-complete?app=${{ steps.extract-app-id.outputs.MOBILE_APP_ID }}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+            -d '{
+              "branchId": "${{ github.event.inputs.branch_id }}",
+              "workflowType": "pull",
+              "status": "success"
+            }' || echo "Failed to notify workflow success"
+      - name: Notify workflow failure
+        if: failure()
+        run: |-
+          curl -X POST "${{ secrets.APPLANGA_API_HOST }}/v1/api/workflow-complete?app=${{ steps.extract-app-id.outputs.MOBILE_APP_ID }}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.APPLANGA_ACCESS_TOKEN }}" \
+            -d '{
+              "branchId": "${{ github.event.inputs.branch_id }}",
+              "workflowType": "pull",
+              "status": "failed"
+            }' || echo "Failed to notify workflow failure"
