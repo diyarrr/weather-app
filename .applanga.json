@@ -6,7 +6,7 @@
         {
           "path": "./package.json",
           "file_format": "chrome_i18n_json",
-          "tag": ["app:messages.json"],
+          "tag": "app:messages.json",
           "language": "en"
         }
       ]
